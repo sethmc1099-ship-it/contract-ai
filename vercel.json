@@ -27,9 +27,6 @@
     },
     "pages/api/admin.js": {
       "maxDuration": 30
-    },
-    "pages/api/test-analysis.js": {
-      "maxDuration": 60
     }
   }
 }
