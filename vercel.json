@@ -4,6 +4,12 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "functions": {
+    "pages/api/checkout.js": {
+      "maxDuration": 30
+    },
+    "pages/api/track.js": {
+      "maxDuration": 15
+    },
     "pages/api/webhook.js": {
       "maxDuration": 60
     },
@@ -15,6 +21,12 @@
     },
     "pages/api/optimize.js": {
       "maxDuration": 60
+    },
+    "pages/api/results.js": {
+      "maxDuration": 30
+    },
+    "pages/api/admin.js": {
+      "maxDuration": 30
     }
   }
 }
