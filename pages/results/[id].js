@@ -9,10 +9,11 @@ export async function getServerSideProps({ params }) {
   const { id } = params
 
   try {
-    const { getDb } = require('../../lib/db')
-    const db = getDb()
+    const { getDb, logEvent } = require('../../lib/db')
+    const db = await getDb()
 
-    const review = db.prepare(`SELECT * FROM reviews WHERE id = ?`).get(id)
+    const reviewResult = await db.execute({ sql: `SELECT * FROM reviews WHERE id = ?`, args: [id] })
+    const review = reviewResult.rows[0]
 
     if (!review) {
       return { notFound: true }
@@ -34,8 +35,7 @@ export async function getServerSideProps({ params }) {
       }
     }
 
-    const { logEvent } = require('../../lib/db')
-    logEvent('view_result', id, review.variant, null)
+    await logEvent('view_result', id, review.variant, null)
 
     return {
       props: {

@@ -27,8 +27,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const db = getDb()
-    const review = db.prepare('SELECT * FROM reviews WHERE id = ?').get(review_id)
+    const db = await getDb()
+    const reviewResult = await db.execute({ sql: 'SELECT * FROM reviews WHERE id = ?', args: [review_id] })
+    const review = reviewResult.rows[0]
 
     if (!review) {
       return res.status(404).json({ error: 'Review not found' })
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Already paid', redirect: `/results/${review_id}` })
     }
 
-    const variant = getVariant(review.variant)
+    const variant = await getVariant(review.variant)
     const priceCents = variant?.config?.price_cents || 1900
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -46,7 +47,7 @@ export default async function handler(req, res) {
 
     // Update email if provided
     if (email) {
-      db.prepare('UPDATE reviews SET email = ? WHERE id = ?').run(email, review_id)
+      await db.execute({ sql: 'UPDATE reviews SET email = ? WHERE id = ?', args: [email, review_id] })
     }
 
     const sessionParams = {
@@ -80,7 +81,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create(sessionParams)
 
-    logEvent('checkout_start', review_id, review.variant, { session_id: session.id, price_cents: priceCents })
+    await logEvent('checkout_start', review_id, review.variant, { session_id: session.id, price_cents: priceCents })
 
     return res.status(200).json({ checkout_url: session.url })
   } catch (err) {

@@ -8,9 +8,10 @@ export async function getServerSideProps({ params }) {
 
   try {
     const { getDb, getVariant } = require('../../lib/db')
-    const db = getDb()
+    const db = await getDb()
 
-    const review = db.prepare(`SELECT id, document_name, status, paid, variant FROM reviews WHERE id = ?`).get(id)
+    const reviewResult = await db.execute({ sql: `SELECT id, document_name, status, paid, variant FROM reviews WHERE id = ?`, args: [id] })
+    const review = reviewResult.rows[0]
 
     if (!review) {
       return { notFound: true }
@@ -22,7 +23,7 @@ export async function getServerSideProps({ params }) {
       }
     }
 
-    const variant = getVariant(review.variant)
+    const variant = await getVariant(review.variant)
     const config = variant?.config || { price_cents: 1900, cta_text: 'Pay & Get Review' }
 
     return {

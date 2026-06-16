@@ -56,7 +56,7 @@ export async function getServerSideProps({ req, res }) {
   let variantData = null
 
   try {
-    const db = getDb()
+    const db = await getDb()
 
     if (!variantId) {
       variantId = await getVariantForVisitor()
@@ -65,10 +65,11 @@ export async function getServerSideProps({ req, res }) {
     }
 
     // Track visit and increment variant visit count
-    db.prepare(`UPDATE ab_variants SET visits = visits + 1, updated_at = unixepoch() WHERE id = ?`).run(variantId)
-    logEvent('visit', null, variantId, { path: '/' })
+    await db.execute({ sql: `UPDATE ab_variants SET visits = visits + 1, updated_at = unixepoch() WHERE id = ?`, args: [variantId] })
+    await logEvent('visit', null, variantId, { path: '/' })
 
-    const row = db.prepare('SELECT * FROM ab_variants WHERE id = ?').get(variantId)
+    const rowResult = await db.execute({ sql: 'SELECT * FROM ab_variants WHERE id = ?', args: [variantId] })
+    const row = rowResult.rows[0]
     if (row) {
       variantData = { ...row, config: JSON.parse(row.config_json) }
     }

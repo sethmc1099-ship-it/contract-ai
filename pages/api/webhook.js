@@ -55,8 +55,9 @@ export default async function handler(req, res) {
     }
 
     try {
-      const db = getDb()
-      const review = db.prepare('SELECT * FROM reviews WHERE id = ?').get(review_id)
+      const db = await getDb()
+      const reviewResult = await db.execute({ sql: 'SELECT * FROM reviews WHERE id = ?', args: [review_id] })
+      const review = reviewResult.rows[0]
 
       if (!review) {
         console.error('Review not found:', review_id)
@@ -64,24 +65,18 @@ export default async function handler(req, res) {
       }
 
       // Mark as paid
-      db.prepare(`
-        UPDATE reviews
-        SET paid = 1, status = 'paid', payment_intent = ?, price_paid = ?
-        WHERE id = ?
-      `).run(
-        session.payment_intent,
-        session.amount_total,
-        review_id
-      )
+      await db.execute({
+        sql: `UPDATE reviews SET paid = 1, status = 'paid', payment_intent = ?, price_paid = ? WHERE id = ?`,
+        args: [session.payment_intent, session.amount_total, review_id],
+      })
 
       // Update variant conversion stats
-      db.prepare(`
-        UPDATE ab_variants
-        SET conversions = conversions + 1, revenue = revenue + ?, updated_at = unixepoch()
-        WHERE id = ?
-      `).run(session.amount_total, variant || review.variant)
+      await db.execute({
+        sql: `UPDATE ab_variants SET conversions = conversions + 1, revenue = revenue + ?, updated_at = unixepoch() WHERE id = ?`,
+        args: [session.amount_total, variant || review.variant],
+      })
 
-      logEvent('payment_success', review_id, variant || review.variant, {
+      await logEvent('payment_success', review_id, variant || review.variant, {
         amount: session.amount_total,
         payment_intent: session.payment_intent,
       })
@@ -89,14 +84,14 @@ export default async function handler(req, res) {
       // Run analysis
       const analysisResult = await analyzeContract(review.document_text, review.document_name)
 
-      db.prepare(`
-        UPDATE reviews
-        SET status = 'complete', result_json = ?
-        WHERE id = ?
-      `).run(JSON.stringify(analysisResult.data), review_id)
+      await db.execute({
+        sql: `UPDATE reviews SET status = 'complete', result_json = ? WHERE id = ?`,
+        args: [JSON.stringify(analysisResult.data), review_id],
+      })
 
       // Send email if provided
-      const updatedReview = db.prepare('SELECT * FROM reviews WHERE id = ?').get(review_id)
+      const updatedResult = await db.execute({ sql: 'SELECT * FROM reviews WHERE id = ?', args: [review_id] })
+      const updatedReview = updatedResult.rows[0]
       if (updatedReview?.email) {
         sendResultsEmail(updatedReview.email, review_id, review.document_name).catch(console.error)
       }

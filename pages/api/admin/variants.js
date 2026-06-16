@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const variants = getAllVariants()
+    const variants = await getAllVariants()
     return res.status(200).json(variants)
   } catch (err) {
     console.error('Variants error:', err)

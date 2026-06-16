@@ -13,7 +13,7 @@ export async function getServerSideProps({ query }) {
 
   try {
     const { getStats } = require('../lib/db')
-    const stats = getStats()
+    const stats = await getStats()
 
     // Serialize dates (SQLite returns integers)
     return {

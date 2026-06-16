@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const stats = getStats()
+    const stats = await getStats()
     return res.status(200).json(stats)
   } catch (err) {
     console.error('Stats error:', err)

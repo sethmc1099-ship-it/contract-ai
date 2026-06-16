@@ -31,15 +31,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const db = getDb()
-    const review = db.prepare('SELECT id, variant FROM reviews WHERE id = ?').get(review_id)
+    const db = await getDb()
+    const reviewResult = await db.execute({ sql: 'SELECT id, variant FROM reviews WHERE id = ?', args: [review_id] })
+    const review = reviewResult.rows[0]
 
     if (!review) {
       return res.status(404).json({ error: 'Review not found' })
     }
 
-    db.prepare('UPDATE reviews SET rating = ? WHERE id = ?').run(numRating, review_id)
-    logEvent('rating', review_id, review.variant, { rating: numRating })
+    await db.execute({ sql: 'UPDATE reviews SET rating = ? WHERE id = ?', args: [numRating, review_id] })
+    await logEvent('rating', review_id, review.variant, { rating: numRating })
 
     return res.status(200).json({ ok: true })
   } catch (err) {

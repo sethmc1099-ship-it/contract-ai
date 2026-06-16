@@ -74,13 +74,13 @@ export default async function handler(req, res) {
     const reviewId = uuidv4()
     const variantId = (fields.variant && fields.variant[0]) || req.cookies?.['contract_ai_variant'] || 'variant_a'
 
-    const db = getDb()
-    db.prepare(`
-      INSERT INTO reviews (id, document_name, document_text, status, variant)
-      VALUES (?, ?, ?, 'pending', ?)
-    `).run(reviewId, originalName, documentText, variantId)
+    const db = await getDb()
+    await db.execute({
+      sql: `INSERT INTO reviews (id, document_name, document_text, status, variant) VALUES (?, ?, ?, 'pending', ?)`,
+      args: [reviewId, originalName, documentText, variantId],
+    })
 
-    logEvent('upload', reviewId, variantId, { document_name: originalName, num_pages: numPages })
+    await logEvent('upload', reviewId, variantId, { document_name: originalName, num_pages: numPages })
 
     // Clean up temp file
     try { fs.unlinkSync(tmpPath) } catch (e) {}

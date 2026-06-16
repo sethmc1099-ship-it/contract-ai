@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    logEvent(event, review_id || null, variant || null, data || null)
+    await logEvent(event, review_id || null, variant || null, data || null)
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('Track error:', err)
