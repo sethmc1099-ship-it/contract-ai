@@ -27,12 +27,6 @@
     },
     "pages/api/admin.js": {
       "maxDuration": 30
-    },
-    "pages/api/simulate-payment.js": {
-      "maxDuration": 60
-    },
-    "pages/api/test-claude.js": {
-      "maxDuration": 60
     }
   }
 }
