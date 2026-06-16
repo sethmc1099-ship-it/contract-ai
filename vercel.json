@@ -1,0 +1,20 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "functions": {
+    "pages/api/webhook.js": {
+      "maxDuration": 60
+    },
+    "pages/api/upload.js": {
+      "maxDuration": 30
+    },
+    "pages/api/review.js": {
+      "maxDuration": 60
+    },
+    "pages/api/optimize.js": {
+      "maxDuration": 60
+    }
+  }
+}
