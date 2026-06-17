@@ -27,6 +27,12 @@
     },
     "pages/api/admin.js": {
       "maxDuration": 30
+    },
+    "pages/api/check-unlimited.js": {
+      "maxDuration": 15
+    },
+    "pages/api/redeem-unlimited.js": {
+      "maxDuration": 60
     }
   }
 }

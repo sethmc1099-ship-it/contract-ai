@@ -261,15 +261,16 @@ export default function Home({ variant }) {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {/* Pay per review */}
+            {/* Single review */}
             <div className="border-2 rounded-2xl p-8 relative" style={{ borderColor: '#10b981' }}>
               <div className="absolute -top-3 left-6">
                 <span className="text-white text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: '#10b981' }}>
                   MOST POPULAR
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Pay Per Review</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Single Review</h3>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-5xl font-bold" style={{ color: '#10b981' }}>{priceDisplay}</span>
+                <span className="text-5xl font-bold" style={{ color: '#10b981' }}>$19</span>
                 <span className="text-gray-500">/ review</span>
               </div>
               <p className="text-gray-600 text-sm mb-6">One-time payment, no subscription</p>
@@ -279,7 +280,6 @@ export default function Home({ variant }) {
                   'Risk score (0-100)',
                   'Key findings with explanations',
                   'Negotiation recommendations',
-                  'Missing protections report',
                   'Should you sign? verdict',
                   'Permanent link to your report',
                 ].map(item => (
@@ -300,23 +300,20 @@ export default function Home({ variant }) {
               </Link>
             </div>
 
-            {/* Monthly */}
+            {/* Unlimited */}
             <div className="border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Monthly Unlimited</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Unlimited Access</h3>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-5xl font-bold text-gray-900">$49</span>
-                <span className="text-gray-500">/ month</span>
+                <span className="text-5xl font-bold text-gray-900">$149</span>
               </div>
-              <p className="text-gray-600 text-sm mb-6">Cancel anytime</p>
+              <p className="text-gray-600 text-sm mb-6">One-time payment, unlimited reviews for life</p>
               <ul className="space-y-3 mb-8">
                 {[
-                  'Everything in Pay Per Review',
+                  'Everything in Single Review',
                   'Unlimited contract reviews',
-                  'Priority processing',
-                  'Review history dashboard',
-                  'Email delivery of results',
-                  'Batch upload support',
-                  'Priority support',
+                  'Any contract type, anytime',
+                  'Just enter your email to redeem',
+                  'Best value for landlords, investors & businesses',
                 ].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-gray-700">
                     <svg className="w-4 h-4 flex-shrink-0 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -330,7 +327,7 @@ export default function Home({ variant }) {
                 href="/review"
                 className="block w-full text-center text-gray-900 font-bold py-3 px-6 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-colors"
               >
-                Get Started
+                Get Unlimited Access
               </Link>
             </div>
           </div>

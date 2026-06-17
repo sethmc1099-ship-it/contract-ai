@@ -1,5 +1,5 @@
 import Stripe from 'stripe'
-import { getDb, logEvent } from '../../lib/db'
+import { getDb, logEvent, addUnlimitedBuyer } from '../../lib/db'
 import { analyzeContract } from '../../lib/claude'
 import { sendResultsEmail } from '../../lib/email'
 
@@ -47,7 +47,21 @@ export default async function handler(req, res) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
-    const { review_id, variant } = session.metadata || {}
+    const { review_id, variant, type, email } = session.metadata || {}
+
+    // Handle unlimited purchase
+    if (type === 'unlimited') {
+      const buyerEmail = email || session.customer_email
+      if (buyerEmail) {
+        try {
+          await addUnlimitedBuyer(buyerEmail, session.payment_intent)
+          console.log('Unlimited buyer added:', buyerEmail)
+        } catch (err) {
+          console.error('Failed to add unlimited buyer:', err)
+        }
+      }
+      return res.status(200).json({ received: true })
+    }
 
     if (!review_id) {
       console.error('No review_id in webhook metadata')
