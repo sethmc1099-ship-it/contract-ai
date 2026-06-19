@@ -26,8 +26,26 @@ const FAQS = [
   },
 ]
 
+const FALLBACK_VARIANT = {
+  id: 'variant_a',
+  config: {
+    headline: 'Protect Yourself Before You Sign',
+    subheadline: 'Upload your contract. Get a full legal risk analysis in 60 seconds. No lawyer needed.',
+    price_cents: 1900,
+    cta_text: 'Review My Contract — $19',
+  },
+}
+
+const BOT_USER_AGENT_RE = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|curl|wget|python-requests|headless|scrapy|ahrefs|semrush|mj12|petalbot/i
+
 export async function getServerSideProps({ req, res }) {
-  // Only run on server side
+  // Bots/crawlers don't persist cookies, so skip the DB-backed A/B logic entirely
+  // for them to avoid paying for the full variant-assignment chain on every hit.
+  const userAgent = req.headers['user-agent'] || ''
+  if (BOT_USER_AGENT_RE.test(userAgent)) {
+    return { props: { variant: FALLBACK_VARIANT } }
+  }
+
   const { getDb, logEvent } = require('../lib/db')
   const { getVariantForVisitor } = require('../lib/optimizer')
 
@@ -43,11 +61,11 @@ export async function getServerSideProps({ req, res }) {
       res.setHeader('Set-Cookie', `contract_ai_variant=${variantId}; Path=/; Max-Age=${30 * 24 * 3600}; SameSite=Lax`)
     }
 
-    // Track visit and increment variant visit count
-    await db.execute({ sql: `UPDATE ab_variants SET visits = visits + 1, updated_at = unixepoch() WHERE id = ?`, args: [variantId] })
-    await logEvent('visit', null, variantId, { path: '/' })
-
-    const rowResult = await db.execute({ sql: 'SELECT * FROM ab_variants WHERE id = ?', args: [variantId] })
+    const [, , rowResult] = await Promise.all([
+      db.execute({ sql: `UPDATE ab_variants SET visits = visits + 1, updated_at = unixepoch() WHERE id = ?`, args: [variantId] }),
+      logEvent('visit', null, variantId, { path: '/' }),
+      db.execute({ sql: 'SELECT * FROM ab_variants WHERE id = ?', args: [variantId] }),
+    ])
     const row = rowResult.rows[0]
     if (row) {
       variantData = { ...row, config: JSON.parse(row.config_json) }
@@ -56,22 +74,9 @@ export async function getServerSideProps({ req, res }) {
     console.error('SSR error:', err)
   }
 
-  // Fallback variant config
-  if (!variantData) {
-    variantData = {
-      id: 'variant_a',
-      config: {
-        headline: 'Protect Yourself Before You Sign',
-        subheadline: 'Upload your contract. Get a full legal risk analysis in 60 seconds. No lawyer needed.',
-        price_cents: 1900,
-        cta_text: 'Review My Contract — $19',
-      },
-    }
-  }
-
   return {
     props: {
-      variant: variantData,
+      variant: variantData || FALLBACK_VARIANT,
     },
   }
 }

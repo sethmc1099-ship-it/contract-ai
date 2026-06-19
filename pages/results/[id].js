@@ -312,13 +312,13 @@ export default function ResultsPage({ review, result, processing }) {
         {/* Upsell */}
         <div style={{ backgroundColor: '#0f172a' }} className="rounded-2xl p-6 text-center text-white">
           <h3 className="text-lg font-bold mb-2">Need to review more contracts?</h3>
-          <p className="text-gray-300 text-sm mb-4">Get unlimited reviews for $49/month. Cancel anytime.</p>
+          <p className="text-gray-300 text-sm mb-4">Get unlimited reviews for life for a one-time payment of $149.</p>
           <Link
             href="/review"
             className="inline-block text-white font-bold px-6 py-3 rounded-xl transition-colors"
             style={{ backgroundColor: '#10b981' }}
           >
-            Subscribe — $49/mo Unlimited
+            Get Unlimited Access — $149
           </Link>
           <p className="text-xs text-gray-500 mt-3">Or <Link href="/review" className="underline">review another contract</Link> for {` `}
             <span className="font-medium">pay-per-review pricing</span>
