@@ -52,6 +52,16 @@ export async function getServerSideProps({ req, res }) {
   let variantId = req.cookies?.['contract_ai_variant']
   let variantData = null
 
+  // No cookie yet (first-time visitor, or a bot that ignores Set-Cookie): let
+  // Vercel's edge cache absorb repeat hits for a few seconds so a traffic burst
+  // (human or automated) only pays the DB cost once instead of once per request.
+  // Varying by Cookie keeps this from ever serving a cached page to a visitor
+  // who already has a variant assigned.
+  if (!variantId) {
+    res.setHeader('Vary', 'Cookie')
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=45')
+  }
+
   try {
     const db = await getDb()
 
