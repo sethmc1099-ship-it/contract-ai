@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 
 const FAQS = [
@@ -36,65 +36,22 @@ const FALLBACK_VARIANT = {
   },
 }
 
-const BOT_USER_AGENT_RE = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|whatsapp|curl|wget|python-requests|headless|scrapy|ahrefs|semrush|mj12|petalbot/i
-
-export async function getServerSideProps({ req, res }) {
-  // Bots/crawlers don't persist cookies, so skip the DB-backed A/B logic entirely
-  // for them to avoid paying for the full variant-assignment chain on every hit.
-  const userAgent = req.headers['user-agent'] || ''
-  if (BOT_USER_AGENT_RE.test(userAgent)) {
-    return { props: { variant: FALLBACK_VARIANT } }
-  }
-
-  const { getDb, logEvent } = require('../lib/db')
-  const { getVariantForVisitor } = require('../lib/optimizer')
-
-  let variantId = req.cookies?.['contract_ai_variant']
-  let variantData = null
-
-  // No cookie yet (first-time visitor, or a bot that ignores Set-Cookie): let
-  // Vercel's edge cache absorb repeat hits for a few seconds so a traffic burst
-  // (human or automated) only pays the DB cost once instead of once per request.
-  // Varying by Cookie keeps this from ever serving a cached page to a visitor
-  // who already has a variant assigned.
-  if (!variantId) {
-    res.setHeader('Vary', 'Cookie')
-    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=45')
-  }
-
-  try {
-    const db = await getDb()
-
-    if (!variantId) {
-      variantId = await getVariantForVisitor()
-      // Set cookie for 30 days
-      res.setHeader('Set-Cookie', `contract_ai_variant=${variantId}; Path=/; Max-Age=${30 * 24 * 3600}; SameSite=Lax`)
-    }
-
-    const [, , rowResult] = await Promise.all([
-      db.execute({ sql: `UPDATE ab_variants SET visits = visits + 1, updated_at = unixepoch() WHERE id = ?`, args: [variantId] }),
-      logEvent('visit', null, variantId, { path: '/' }),
-      db.execute({ sql: 'SELECT * FROM ab_variants WHERE id = ?', args: [variantId] }),
-    ])
-    const row = rowResult.rows[0]
-    if (row) {
-      variantData = { ...row, config: JSON.parse(row.config_json) }
-    }
-  } catch (err) {
-    console.error('SSR error:', err)
-  }
-
-  return {
-    props: {
-      variant: variantData || FALLBACK_VARIANT,
-    },
-  }
-}
-
-export default function Home({ variant }) {
-  const config = variant?.config || {}
+// The homepage is fully static — no per-request DB calls — so it costs nothing
+// no matter how much bot/crawler traffic hits it. Visit tracking happens via a
+// client-side beacon below, which only fires in real browsers that execute JS.
+export default function Home() {
+  const variant = FALLBACK_VARIANT
+  const config = variant.config
   const priceDisplay = config.price_cents ? `$${(config.price_cents / 100).toFixed(0)}` : '$19'
   const [openFaq, setOpenFaq] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'visit', variant: variant.id, data: { path: '/' } }),
+    }).catch(() => {})
+  }, [])
 
   return (
     <Layout>
