@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     if (review.paid) return res.status(400).json({ error: 'Already paid', redirect: `/results/${review_id}` })
 
     const variant = await getVariant(review.variant)
-    const priceCents = 1900
+    const priceCents = 900
 
     if (email) {
       await db.execute({ sql: 'UPDATE reviews SET email = ? WHERE id = ?', args: [email, review_id] })

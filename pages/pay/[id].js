@@ -160,7 +160,7 @@ export default function PayPage({ review }) {
           <div className="border-2 rounded-2xl p-6 flex flex-col" style={{ borderColor: '#10b981' }}>
             <div className="text-xs font-bold text-emerald-600 mb-3">SINGLE REVIEW</div>
             <div className="flex items-baseline gap-1 mb-1">
-              <span className="text-4xl font-bold text-gray-900">$19</span>
+              <span className="text-4xl font-bold text-gray-900">$9</span>
             </div>
             <div className="text-sm text-gray-500 mb-5">one-time payment</div>
             <ul className="space-y-2 mb-6 flex-1">
@@ -177,7 +177,7 @@ export default function PayPage({ review }) {
               className="w-full text-white font-bold py-3 rounded-xl transition-opacity disabled:opacity-60"
               style={{ backgroundColor: '#10b981' }}
             >
-              {loading ? 'Loading...' : isUnlimited ? 'Use Unlimited Access' : 'Pay $19 — Get My Review'}
+              {loading ? 'Loading...' : isUnlimited ? 'Use Unlimited Access' : 'Pay $9 — Get My Review'}
             </button>
           </div>
 

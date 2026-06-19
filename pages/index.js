@@ -31,8 +31,8 @@ const FALLBACK_VARIANT = {
   config: {
     headline: 'Protect Yourself Before You Sign',
     subheadline: 'Upload your contract. Get a full legal risk analysis in 60 seconds. No lawyer needed.',
-    price_cents: 1900,
-    cta_text: 'Review My Contract — $19',
+    price_cents: 900,
+    cta_text: 'Review My Contract — $9',
   },
 }
 
@@ -42,7 +42,7 @@ const FALLBACK_VARIANT = {
 export default function Home() {
   const variant = FALLBACK_VARIANT
   const config = variant.config
-  const priceDisplay = config.price_cents ? `$${(config.price_cents / 100).toFixed(0)}` : '$19'
+  const priceDisplay = config.price_cents ? `$${(config.price_cents / 100).toFixed(0)}` : '$9'
   const [openFaq, setOpenFaq] = useState(null)
 
   useEffect(() => {
@@ -204,7 +204,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Single Review</h3>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-5xl font-bold" style={{ color: '#10b981' }}>$19</span>
+                <span className="text-5xl font-bold" style={{ color: '#10b981' }}>$9</span>
                 <span className="text-gray-500">/ review</span>
               </div>
               <p className="text-gray-600 text-sm mb-6">One-time payment, no subscription</p>
