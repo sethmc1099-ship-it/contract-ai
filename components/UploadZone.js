@@ -5,6 +5,9 @@ const ACCEPTED_TYPES = {
   'text/plain': '.txt',
   'application/msword': '.doc',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
 }
 
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
@@ -21,8 +24,8 @@ export default function UploadZone({ onUpload, variant }) {
     if (!f) return 'No file selected'
     if (f.size > MAX_SIZE) return `File too large. Maximum size is 10MB (this file is ${(f.size / 1024 / 1024).toFixed(1)}MB)`
     const ext = f.name.split('.').pop().toLowerCase()
-    if (!['pdf', 'txt', 'doc', 'docx'].includes(ext)) {
-      return 'Unsupported file type. Please upload a PDF, DOC, DOCX, or TXT file.'
+    if (!['pdf', 'txt', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+      return 'Unsupported file type. Please upload a PDF, DOC, DOCX, TXT, or photo (JPG/PNG).'
     }
     return null
   }
@@ -119,7 +122,7 @@ export default function UploadZone({ onUpload, variant }) {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.txt,.doc,.docx"
+            accept=".pdf,.txt,.doc,.docx,.jpg,.jpeg,.png,.webp"
             onChange={handleInputChange}
             className="hidden"
           />
@@ -131,12 +134,12 @@ export default function UploadZone({ onUpload, variant }) {
             </div>
             <div>
               <p className="text-lg font-semibold text-gray-700">
-                {isDragging ? 'Drop your contract here' : 'Drag & drop your contract'}
+                {isDragging ? 'Drop your contract here' : 'Drag & drop your contract, or a photo of it'}
               </p>
               <p className="text-gray-500 mt-1">or <span className="text-emerald-600 font-medium">click to browse</span></p>
             </div>
             <div className="flex gap-3 flex-wrap justify-center">
-              {['PDF', 'DOC', 'DOCX', 'TXT'].map(type => (
+              {['PDF', 'DOC', 'DOCX', 'TXT', 'JPG', 'PNG'].map(type => (
                 <span key={type} className="text-xs bg-white border border-gray-200 text-gray-600 px-2 py-1 rounded font-mono">
                   .{type.toLowerCase()}
                 </span>

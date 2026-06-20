@@ -3,6 +3,14 @@ import fs from 'fs'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb, logEvent } from '../../lib/db'
+import { extractTextFromImage } from '../../lib/claude'
+
+const IMAGE_MEDIA_TYPES = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+}
 
 export const config = {
   api: { bodyParser: false },
@@ -62,8 +70,17 @@ export default async function handler(req, res) {
         return res.status(422).json({ error: 'Could not extract text from DOC/DOCX. For best results, please save your document as a PDF or TXT file.' })
       }
       documentText = stripped
+    } else if (IMAGE_MEDIA_TYPES[ext]) {
+      const buffer = fs.readFileSync(tmpPath)
+      const base64Data = buffer.toString('base64')
+      const result = await extractTextFromImage(base64Data, IMAGE_MEDIA_TYPES[ext])
+      if (!result.success) {
+        return res.status(422).json({ error: 'Could not read text from this photo. Please make sure the contract is in focus, well-lit, and try again — or upload a PDF/TXT instead.' })
+      }
+      documentText = result.text
+      numPages = 1
     } else {
-      return res.status(422).json({ error: `Unsupported file type: ${ext}. Please upload a PDF, DOC, DOCX, or TXT file.` })
+      return res.status(422).json({ error: `Unsupported file type: ${ext}. Please upload a PDF, DOC, DOCX, TXT, or photo (JPG/PNG) file.` })
     }
 
     if (documentText.trim().length < 100) {
